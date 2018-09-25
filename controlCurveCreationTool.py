@@ -140,7 +140,7 @@ attributes = [
 # Rename Function #
 
 
-def curve_rename(x, y, z, q):
+def curve_rename(input_object, selection_list, iteration, selection_name):
 
     curve_prefix = mc.textField('CurvePrefix', query=True, text=True)
     curve_name = mc.textField('CurveName', query=True, text=True)
@@ -150,69 +150,58 @@ def curve_rename(x, y, z, q):
     length_prefix = len(curve_prefix)
     length_name = len(curve_name)
     length_suffix = len(curve_suffix)
-    length_selection = len(y)
-    a = z + 1
+    length_selection = len(selection_list)
+    a = iteration + 1
     length_string = str(a).zfill(2)
 
-    ovlength_suffix = len(q)
-    condition_jnt = ovlength_suffix - 3
-    condition_bone = ovlength_suffix - 4
-    condition_other = ovlength_suffix - 3
-    override_jnt = q[condition_jnt:ovlength_suffix]
-    override_bone = q[condition_bone:ovlength_suffix]
-    override_other = q[condition_other:ovlength_suffix]
-
     if override_value == 1:
-        if override_jnt == 'JNT':
-            mc.rename(x, q.replace('JNT', 'CTRL'))
-            print 'JNT'
-        elif override_jnt != 'JNT':
-            if override_bone == 'BONE':
-                mc.rename(x, q.replace('BONE', 'CTRL'))
-                print 'BONE'
-            elif override_bone != 'BONE':
-                mc.rename(x, q.replace(override_other, 'CTRL'))
-                print 'OTHER'
+        kill_length = selection_name.rfind('_')
+        mc.rename(input_object,
+                  selection_name.replace(selection_name[kill_length:], '_CTRL'))
+
     elif override_value == 0:
         if length_selection > 1:
             if length_prefix > 0 and length_name > 0 and length_suffix > 0:
-                mc.rename(x, (curve_prefix + '_' + curve_name + '_'
-                              + curve_suffix))
+                mc.rename(input_object, (curve_prefix + '_' + curve_name + '_'
+                                         + length_string + '_' + curve_suffix))
             elif length_prefix == 0 and length_name > 0 and length_suffix > 0:
-                mc.rename(x, (curve_name + '_' + length_string + '_'
-                              + curve_suffix))
+                mc.rename(input_object, (curve_name + '_' + length_string + '_'
+                                         + curve_suffix))
             elif length_prefix > 0 and length_name > 0 and length_suffix == 0:
-                mc.rename(x, (curve_prefix + '_' + curve_name + '_' +
-                              length_string))
+                mc.rename(input_object, (curve_prefix + '_' + curve_name + '_' +
+                                         length_string))
             elif length_prefix > 0 and length_name == 0 and length_suffix > 0:
-                mc.rename(x, (curve_prefix + '_' + x + '_' + length_string + '_'
-                              + curve_suffix))
+                mc.rename(input_object, (curve_prefix + '_' + input_object + '_'
+                                         + length_string + '_' + curve_suffix))
             elif length_prefix == 0 and length_name > 0 and length_suffix == 0:
-                mc.rename(x, curve_name + '_' + length_string)
+                mc.rename(input_object, curve_name + '_' + length_string)
             elif length_prefix > 0 and length_name == 0 and length_suffix == 0:
-                mc.rename(x, (curve_prefix + '_' + x[0] + '_' + length_string))
+                mc.rename(input_object, (curve_prefix + '_' + input_object[0] +
+                                         '_' + length_string))
             elif length_prefix == 0 and length_name == 0 and length_suffix > 0:
-                mc.rename(x, (x[0] + '_' + length_string + '_' + curve_suffix))
+                mc.rename(input_object, (input_object[0] + '_' + length_string
+                                         + '_' + curve_suffix))
             else:
-                print x
+                print input_object
         elif length_selection < 2:
             if length_prefix > 0 and length_name > 0 and length_suffix > 0:
-                mc.rename(x, (curve_prefix + '_' + curve_name + '_'
-                              + curve_suffix))
+                mc.rename(input_object, (curve_prefix + '_' + curve_name + '_'
+                                         + curve_suffix))
             elif length_prefix == 0 and length_name > 0 and length_suffix > 0:
-                mc.rename(x, (curve_name + '_' + curve_suffix))
+                mc.rename(input_object, (curve_name + '_' + curve_suffix))
             elif length_prefix > 0 and length_name > 0 and length_suffix == 0:
-                mc.rename(x, (curve_prefix + '_' + curve_name))
+                mc.rename(input_object, (curve_prefix + '_' + curve_name))
             elif length_prefix > 0 and length_name == 0 and length_suffix > 0:
-                mc.rename(x, (curve_prefix + '_' + x + '_' + curve_suffix))
+                mc.rename(input_object, (curve_prefix + '_' + selection_name + '_'
+                                         + curve_suffix))
             elif length_prefix == 0 and length_name > 0 and length_suffix == 0:
-                mc.rename(x, curve_name)
+                mc.rename(input_object, curve_name)
             elif length_prefix > 0 and length_name == 0 and length_suffix == 0:
-                mc.rename(x, (curve_prefix + '_' + x[0]))
+                mc.rename(input_object, (curve_prefix + '_' + input_object[0]))
             elif length_prefix == 0 and length_name == 0 and length_suffix > 0:
-                mc.rename(x, (x[0] + '_' + curve_suffix))
+                mc.rename(input_object, (input_object[0] + '_' + curve_suffix))
             else:
-                print x
+                print input_object
 
 # Grouping Options #
 
@@ -253,23 +242,22 @@ def grp(*arg):
             mc.group(n=(group_selection[0].replace('CTRL', 'ZERO')))
     elif override_value == 0:
         if srt is True:
-            mc.group(n=(group_selection[0].replace(curve_suffix, 'SRT')))
+            mc.group(n=(group_selection[0] + '_SRT'))
         if sdk is True:
-            mc.group(n=(group_selection[0].replace(curve_suffix, 'SDK')))
+            mc.group(n=(group_selection[0] + '_SDK'))
         if space is True:
-            mc.group(n=(group_selection[0].replace(curve_suffix, 'SPACE')))
+            mc.group(n=(group_selection[0] + '_SPACE'))
         if dummy is True:
-            mc.group(n=(group_selection[0].replace(curve_suffix, 'DUMMY')))
+            mc.group(n=(group_selection[0] + '_DUMMY'))
         if other is True:
             if other_group_length == 0:
-                mc.group(n=(group_selection[0].replace(curve_suffix, 'NULL')))
+                mc.group(n=(group_selection[0] + '_NULL'))
             else:
-                mc.group(n=(group_selection[0].replace(curve_suffix,
-                         other_group_value)))
+                mc.group(n=(group_selection[0] + other_group_value))
         if offset is True:
-            mc.group(n=(group_selection[0].replace(curve_suffix, 'OFS')))
+            mc.group(n=(group_selection[0] + '_OFS'))
         if zero is True:
-            mc.group(n=(group_selection[0].replace(curve_suffix, 'ZERO')))
+            mc.group(n=(group_selection[0] + '_ZERO'))
 
 # Snap to Point #
 
@@ -777,8 +765,8 @@ def arrow(*arg):
                              (1, 0, 3), (1, 0, 3), (1, 0, 3), (1, 0, 3),
                              (-1, 0, 3), (-1, 0, 3), (-1, 0, 3), (-1, 0, 3),
                              (-1, 0, 2), (-1, 0, 1), (-1, 0, 0), (-1, 0, -1),
-                             (-1, 0, -2), (-1, 0, -3)], n='arrow_01')            
-            mc.makeIdentity(apply=True, t=True, r=True, s=True, n=False, 
+                             (-1, 0, -2), (-1, 0, -3)], n='arrow_01')
+            mc.makeIdentity(apply=True, t=True, r=True, s=True, n=False,
                             pn=True)
             mc.delete(constructionHistory=True)
             curve_selection_list = mc.ls(sl=True)
@@ -921,19 +909,19 @@ def ring(*arg):
     selection_list = mc.ls(sl=True)
     snap_list_size = len(selection_list)
     if snap_list_size == 0:
-        mc.curve(d=1,  p=[(0.707107, 0.1, 0.707107), (1, 0.1, 0), (1, -0.1, 0), 
-                          (0.707107, -0.1, -0.707107), (0.707107, 0.1, 
-                          -0.707107), (0, 0.1, -1), (0, -0.1, -1), (-0.707107, 
-                          -0.1, -0.707107), (-0.707107, 0.1, -0.707107), (-1, 
-                          0.1, 0), (-1, -0.1, 0), (-0.707107, -0.1, 0.707107), 
-                          (-0.707107, 0.1, 0.707107), (0, 0.1, 1), (0, -0.1, 1), 
-                          (0.707107, -0.1, 0.707107), (0.707107, 0.1, 0.707107), 
-                          (0, 0.1, 1), (0, -0.1, 1), (-0.707107, -0.1, 
-                          0.707107), (-0.707107, 0.1, 0.707107), (-1, 0.1, 0), 
-                          (-1, -0.1, 0), (-0.707107, -0.1, -0.707107), 
-                          (-0.707107, 0.1, -0.707107), (0, 0.1, -1), (0, -0.1, 
-                          -1), (0.707107, -0.1, -0.707107), (0.707107, 0.1, 
-                          -0.707107), (1, 0.1, 0), (1, -0.1, 0), (0.707107, 
+        mc.curve(d=1,  p=[(0.707107, 0.1, 0.707107), (1, 0.1, 0), (1, -0.1, 0),
+                          (0.707107, -0.1, -0.707107), (0.707107, 0.1,
+                          -0.707107), (0, 0.1, -1), (0, -0.1, -1), (-0.707107,
+                          -0.1, -0.707107), (-0.707107, 0.1, -0.707107), (-1,
+                          0.1, 0), (-1, -0.1, 0), (-0.707107, -0.1, 0.707107),
+                          (-0.707107, 0.1, 0.707107), (0, 0.1, 1), (0, -0.1, 1),
+                          (0.707107, -0.1, 0.707107), (0.707107, 0.1, 0.707107),
+                          (0, 0.1, 1), (0, -0.1, 1), (-0.707107, -0.1,
+                          0.707107), (-0.707107, 0.1, 0.707107), (-1, 0.1, 0),
+                          (-1, -0.1, 0), (-0.707107, -0.1, -0.707107),
+                          (-0.707107, 0.1, -0.707107), (0, 0.1, -1), (0, -0.1,
+                          -1), (0.707107, -0.1, -0.707107), (0.707107, 0.1,
+                          -0.707107), (1, 0.1, 0), (1, -0.1, 0), (0.707107,
                           -0.1, 0.707107)],  n='ring_01')
         mc.makeIdentity(apply=True, t=True, r=True, s=True, n=False, pn=True)
         mc.delete(constructionHistory=True)
@@ -1016,25 +1004,25 @@ def tube(*arg):
         for curve_number in range(snap_list_size):
             # creating the curves
             t1 = mc.curve(d=2, p=[(1, 2, 0), (1, 0, 0), (1, -2, 0)])
-            mc.makeIdentity(apply=True, t=True, r=True, s=True, n=False, 
+            mc.makeIdentity(apply=True, t=True, r=True, s=True, n=False,
                             pn=True)
             t2 = mc.curve(d=2, p=[(-1, 2, 0), (-1, 0, 0), (-1, -2, 0)])
-            mc.makeIdentity(apply=True, t=True, r=True, s=True, n=False, 
+            mc.makeIdentity(apply=True, t=True, r=True, s=True, n=False,
                             pn=True)
             t3 = mc.curve(d=2, p=[(0, 2, 1), (0, 0, 1), (0, -2, 1)])
-            mc.makeIdentity(apply=True, t=True, r=True, s=True, n=False, 
+            mc.makeIdentity(apply=True, t=True, r=True, s=True, n=False,
                             pn=True)
             t4 = mc.curve(d=2, p=[(0, 2, -1), (0, 0, -1), (0, -2, -1)])
-            mc.makeIdentity(apply=True, t=True, r=True, s=True, n=False, 
+            mc.makeIdentity(apply=True, t=True, r=True, s=True, n=False,
                             pn=True)
             t5 = mc.circle(nr=[0, 1, 0])
             mc.move(0, 2, 0)
-            mc.makeIdentity(apply=True, t=True, r=True, s=True, n=False, 
+            mc.makeIdentity(apply=True, t=True, r=True, s=True, n=False,
                             pn=True)
             t6 = mc.circle(nr=[0, 1, 0], n='tube_01')
             mc.move(0, -2, 0)
             # parenting the curves
-            mc.makeIdentity(apply=True, t=True, r=True, s=True, n=False, 
+            mc.makeIdentity(apply=True, t=True, r=True, s=True, n=False,
                             pn=True)
             rc2 = mc.listRelatives(t1, shapes=True)
             mc.parent(rc2[0], t6, r=True, shape=True)
@@ -1086,7 +1074,7 @@ def half_dome(*arg):
             mc.delete(constructionHistory=True)
             curve_selection_list = mc.ls(sl=True)
             selection_name = selection_list[curve_number]
-            curve_rename(curve_selection_list, selection_list, curve_number, 
+            curve_rename(curve_selection_list, selection_list, curve_number,
                          selection_name)
             grp()
             selection_size = curve_number + 1
@@ -1201,49 +1189,49 @@ def other_color(*arg):
 
 def hand_attr(*arg):
     # adding attributes
-    mc.addAttr(ci=True, sn='IKFK', ln='IKFK', min=0, max=1, at='double', 
+    mc.addAttr(ci=True, sn='IKFK', ln='IKFK', min=0, max=1, at='double',
                defaultValue=1)
     mc.addAttr(ci=True, ln='bendy',  at='double',  min=0, max=1, dv=0)
     mc.addAttr(ci=True, sn='_', ln='_', min=0, max=0, en='Masters', at='enum')
     mc.addAttr(ci=True, sn='spread', ln='spread', min=-10, max=10, at='double')
     mc.addAttr(ci=True, sn='masterRot', ln='masterRotation', at='double')
     mc.addAttr(ci=True, sn='offset', ln='offset', at='double')
-    mc.addAttr(ci=True, sn='offsetFavor', ln='offsetFavor', min=0, max=1, 
+    mc.addAttr(ci=True, sn='offsetFavor', ln='offsetFavor', min=0, max=1,
                en='Pinky:Index', at='enum')
     mc.addAttr(ci=True, sn='__', ln='__', min=0, max=0, en='Index', at='enum')
     mc.addAttr(ci=True, sn='indexBase', ln='indexBase', at='double')
     mc.addAttr(ci=True, sn='indexMid', ln='indexMid', at='double')
     mc.addAttr(ci=True, sn='indexEnd', ln='indexEnd', at='double')
-    mc.addAttr(ci=True, sn='___', ln='___', min=0, max=0, en='Middle', 
+    mc.addAttr(ci=True, sn='___', ln='___', min=0, max=0, en='Middle',
                at='enum')
     mc.addAttr(ci=True, sn='middleBase', ln='middleBase', at='double')
     mc.addAttr(ci=True, sn='middleMid', ln='middleMid', at='double')
     mc.addAttr(ci=True, sn='middleEnd', ln='middleEnd', at='double')
-    mc.addAttr(ci=True, sn='____', ln='____', min=0, max=0, en='Ring', 
+    mc.addAttr(ci=True, sn='____', ln='____', min=0, max=0, en='Ring',
                at='enum')
     mc.addAttr(ci=True, sn='ringBase', ln='ringBase', at='double')
     mc.addAttr(ci=True, sn='ringMid', ln='ringMid', at='double')
     mc.addAttr(ci=True, sn='ringEnd', ln='ringEnd', at='double')
-    mc.addAttr(ci=True, sn='_____', ln='_____', min=0, max=0, en='Pinky', 
+    mc.addAttr(ci=True, sn='_____', ln='_____', min=0, max=0, en='Pinky',
                at='enum')
     mc.addAttr(ci=True, sn='pinkyBase', ln='pinkyBase', at='double')
     mc.addAttr(ci=True, sn='pinkyMid', ln='pinkyMid', at='double')
     mc.addAttr(ci=True, sn='pinkyEnd', ln='pinkyEnd', at='double')
-    mc.addAttr(ci=True, sn='______', ln='______', min=0, max=0, en='Thumb', 
+    mc.addAttr(ci=True, sn='______', ln='______', min=0, max=0, en='Thumb',
                at='enum')
     mc.addAttr(ci=True, sn='thumbMid', ln='thumbMid', at='double')
     mc.addAttr(ci=True, sn='thumbEnd', ln='thumbEnd', at='double')
-    mc.addAttr(ci=True, sn='_______', ln='_______', min=0, max=0, en='Vis', 
+    mc.addAttr(ci=True, sn='_______', ln='_______', min=0, max=0, en='Vis',
                at='enum')
-    mc.addAttr(ci=True, sn='masterVis', ln='masterVis', min=0, max=1, at='long', 
+    mc.addAttr(ci=True, sn='masterVis', ln='masterVis', min=0, max=1, at='long',
                defaultValue=1)
-    mc.addAttr(ci=True, sn='thumbVis', ln='thumbVis', min=0, max=1, at='long', 
+    mc.addAttr(ci=True, sn='thumbVis', ln='thumbVis', min=0, max=1, at='long',
                defaultValue=1)
-    mc.addAttr(ci=True, sn='indexVis', ln='indexVis', min=0, max=1, at='long', 
+    mc.addAttr(ci=True, sn='indexVis', ln='indexVis', min=0, max=1, at='long',
                defaultValue=1)
-    mc.addAttr(ci=True, sn='middleVis', ln='middleVis', min=0, max=1, at='long', 
+    mc.addAttr(ci=True, sn='middleVis', ln='middleVis', min=0, max=1, at='long',
                defaultValue=1)
-    mc.addAttr(ci=True, sn='pinkyVis', ln='pinkyVis', min=0, max=1, at='long', 
+    mc.addAttr(ci=True, sn='pinkyVis', ln='pinkyVis', min=0, max=1, at='long',
                defaultValue=1)
     # setting keyability
     mc.setAttr('.IKFK', keyable=True)
@@ -1293,7 +1281,7 @@ def reverse_foot_attr(*arg):
     mc.addAttr(ci=True, ln='toeRoll',  at='double',  dv=0)
     mc.addAttr(ci=True, ln='heelPivot',  at='double',  dv=0)
     mc.addAttr(ci=True, ln='heelRoll',  at='double',  dv=0)
-    mc.addAttr(ci=True, sn='stretch', ln='stretch', min=0, max=1, at='long', 
+    mc.addAttr(ci=True, sn='stretch', ln='stretch', min=0, max=1, at='long',
                defaultValue=0)
     mc.addAttr(ci=True, ln='bendy',  at='double',  min=0, max=1, dv=0)
     # setting keyability
@@ -1316,7 +1304,7 @@ def reverse_foot_attr(*arg):
 
 def foot_switch(*arg):
     # adding attributes
-    mc.addAttr(ci=True, sn='IKFK', ln='IKFK', min=0, max=1, at='double', 
+    mc.addAttr(ci=True, sn='IKFK', ln='IKFK', min=0, max=1, at='double',
                defaultValue=1)
     mc.addAttr(ci=True, sn='toeControls', ln='toeControls', min=0, max=1,
                at='long', dv=1)
@@ -1338,16 +1326,16 @@ def sync_phoneme_attr(*arg):
     mc.addAttr(ci=True, sn='O_H', ln='O_H', min=0, max=1, at='double')
     mc.addAttr(ci=True, sn='U_W', ln='U_W', min=0, max=1, at='double')
     mc.addAttr(ci=True, sn='L', ln='L', min=0, max=1, at='double')
-    mc.addAttr(ci=True, sn='S_D_G_e_General', ln='S_D_G_e_General', min=0, 
+    mc.addAttr(ci=True, sn='S_D_G_e_General', ln='S_D_G_e_General', min=0,
                max=1, at='double')
-    mc.addAttr(ci=True, sn='___', ln='___', min=0, max=0, en='Closed', 
+    mc.addAttr(ci=True, sn='___', ln='___', min=0, max=0, en='Closed',
                at='enum')
     mc.addAttr(ci=True, sn='F_V', ln='F_V', min=0, max=1, at='double')
     mc.addAttr(ci=True, sn='M_P_B', ln='M_P_B', min=0, max=1, at='double')
-    mc.addAttr(ci=True, sn='____', ln='____', min=0, max=0, en='Tongue', 
+    mc.addAttr(ci=True, sn='____', ln='____', min=0, max=0, en='Tongue',
                at='enum')
     mc.addAttr(ci=True, sn='upDown', ln='upDown', min=-2, max=10, at='double')
-    mc.addAttr(ci=True, sn='leftRight', ln='leftRight', min=-5, max=5, 
+    mc.addAttr(ci=True, sn='leftRight', ln='leftRight', min=-5, max=5,
                at='double')
     # setting keyability
     mc.setAttr('._', channelBox=True)
@@ -1375,7 +1363,7 @@ def world_space(*arg):
     attribute_selection = mc.ls(sl=True)
     q = mc.attributeQuery('_________', node=attribute_selection[0], exists=True)
     if q is False:
-        mc.addAttr(ci=True, sn='_________', ln='_________', min=0, max=1, 
+        mc.addAttr(ci=True, sn='_________', ln='_________', min=0, max=1,
                    en='Spaces', at='enum')
         mc.setAttr('._________', cb=True)
     # add the new attribute
@@ -1431,7 +1419,7 @@ def cog_space(*arg):
                    en='Spaces', at='enum')
         mc.setAttr('._________', cb=True)
     # add the new attribute
-    mc.addAttr(ci=True, sn='Cother_group_value', ln='Cother_group_value', min=0, 
+    mc.addAttr(ci=True, sn='Cother_group_value', ln='Cother_group_value', min=0,
                max=1, at='double')
     mc.setAttr('.Cother_group_value', k=True)
 
@@ -1490,7 +1478,7 @@ def hide_attr(*arg):
 
     for attr in attributes:
         if mc.checkBox(attr.replace('.', '').upper(), q=True, v=True) is True:
-            mc.setAttr(selection_list[0] + attr, keyable=False, 
+            mc.setAttr(selection_list[0] + attr, keyable=False,
                        channelBox=False)
 
 
@@ -1508,8 +1496,8 @@ def lock_hide_attr(*arg):
 
 
 def unlock_show_attr(*arg):
-    unlock_attr()
     show_attr()
+    unlock_attr()
 
 
 def change_attr_box(*arg):
@@ -1565,7 +1553,7 @@ def nick_curves_mill():
     # Naming Layout
     mc.frameLayout(label='Naming Conventions', mw=4, mh=4,
                    bgc=[0.18, 0.21, 0.25])
-    mc.rowColumnLayout(numberOfColumns=3, 
+    mc.rowColumnLayout(numberOfColumns=3,
                        columnWidth=[(1, 100), (2, 150), (3, 100)])
     mc.text('Prefix')
     mc.text('Name')
@@ -1578,7 +1566,7 @@ def nick_curves_mill():
     mc.setParent('..')
     # Group Layout
     mc.frameLayout(label='Grouping', mw=4, mh=4, bgc=[0.18, 0.21, 0.25])
-    mc.rowColumnLayout(numberOfColumns=3, 
+    mc.rowColumnLayout(numberOfColumns=3,
                        columnWidth=[(1, 115), (2, 115), (3, 115)])
     mc.checkBox('zeroBox', label='ZERO')
     mc.checkBox('srtBox', label='SRT')
@@ -1636,11 +1624,11 @@ def nick_curves_mill():
     mc.setParent('..')
 
     # Lock/Unlock/Hide Attribute Options
-    mc.frameLayout(label='Lock & Hide Attributes', mw=4, mh=4, 
+    mc.frameLayout(label='Lock & Hide Attributes', mw=4, mh=4,
                    bgc=[0.18, 0.21, 0.25])
     mc.rowColumnLayout(numberOfColumns=2, columnWidth=[(1, 150), (2, 200)])
-    mc.rowColumnLayout(numberOfColumns=5, columnWidth=[(1, 50), (2, 25), 
-                       (3, 25), (4, 25), (5, 25)], columnAlign=[(1, 'right'), 
+    mc.rowColumnLayout(numberOfColumns=5, columnWidth=[(1, 50), (2, 25),
+                       (3, 25), (4, 25), (5, 25)], columnAlign=[(1, 'right'),
                        (2, 'left'), (3, 'left'), (4, 'left'), (5, 'left')])
     mc.text('space1', label='')
     mc.text('X')
@@ -1703,7 +1691,7 @@ def nick_curves_mill():
     mc.setParent('..')
     mc.setParent('..')
     # Attribute Options  ## Needs updating
-    mc.frameLayout(label='Attribute Presets', cll=True, cl=True, mw=4, mh=4, 
+    mc.frameLayout(label='Attribute Presets', cll=True, cl=True, mw=4, mh=4,
                    bgc=[0.18, 0.21, 0.25])
     mc.rowColumnLayout(numberOfColumns=2, columnWidth=[(1, 175), (2, 175)])
     mc.button(label='Hand Attributes', command=hand_attr)
@@ -1720,6 +1708,3 @@ def nick_curves_mill():
 
     mc.showWindow(window_name)
     mc.window(window_name, edit=True, width=200, height=210)
-
-
-nick_curves_mill()
