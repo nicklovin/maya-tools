@@ -52,9 +52,10 @@ def assign_even_weights(vertex_circumference, upper_joint, lower_joint,
         cmds.meshReorder(temp_geo + '.vtx[0]',
                          temp_geo + '.vtx[1]',
                          temp_geo + '.vtx[' + str(vertex_circumference) + ']')
-    cmds.meshReorder(temp_geo + reorder_vertices[0],
-                     temp_geo + reorder_vertices[1],
-                     temp_geo + reorder_vertices[2])
+    else:
+        cmds.meshReorder(temp_geo + reorder_vertices[0],
+                         temp_geo + reorder_vertices[1],
+                         temp_geo + reorder_vertices[2])
     skin = cmds.skinCluster(temp_geo, upper_joint, lower_joint, tsb=True)[0]
 
     # Dictionary for returned keys and values if debugging needed later
