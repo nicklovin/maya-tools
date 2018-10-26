@@ -1,6 +1,7 @@
 from PySide2 import QtWidgets, QtGui, QtCore
 import pymel.core as pm
 import maya.cmds as cmds
+from functools import partial
 # Dockable options
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
@@ -58,11 +59,9 @@ class Interpolate(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         new_widget = InterpolateWidget()
         self.interp_layout.addWidget(new_widget)
         self._interp_widget.append(new_widget)
-        self.connect(new_widget, QtCore.SIGNAL('CLOSE'), self.remove)
-        print 'add'
+        new_widget.CLOSE.connect(partial(self.remove, new_widget))
 
-    def remove(self, interp_widget):
-        print 'remove'
+    def remove(self, interp_widget, *args):  # *args takes unnecessary param
         self._interp_widget.remove(interp_widget)
         self.interp_layout.removeWidget(interp_widget)
         interp_widget.deleteLater()
@@ -80,6 +79,10 @@ class Interpolate(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
 
 class InterpolateWidget(QtWidgets.QFrame):
+    # signal variables
+    CLOSE = QtCore.Signal(str)
+    signal_str = 'CLOSE'
+
     def __init__(self):
         QtWidgets.QFrame.__init__(self)
         self.setFrameStyle(QtWidgets.QFrame.Panel | QtWidgets.QFrame.Raised)
@@ -308,8 +311,7 @@ class InterpolateWidget(QtWidgets.QFrame):
                 pm.setAttr(node.attr(attr), cache[attr][value])
 
     def close_widget(self):
-        print 'emit'
-        self.emit(QtCore.SIGNAL('CLOSE'), self)
+        self.CLOSE.emit(self.signal_str)
 
 
 dialog = None
