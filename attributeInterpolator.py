@@ -13,6 +13,10 @@ class Interpolate(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         self.setWindowTitle('Interpolator')
         self.setFixedWidth(314)
 
+        # Make adjustments to find the file location
+        style_sheet_file = open('C:\Users\Nick Love\PycharmProjects\maya_tools\stylesheets\interpolate scheme.qss', 'r')
+        self.setStyleSheet(style_sheet_file.read())
+
         self.setLayout(QtWidgets.QVBoxLayout())
         self.layout().setContentsMargins(0, 0, 0, 0)
         self.layout().setSpacing(0)
@@ -23,12 +27,13 @@ class Interpolate(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.layout().addWidget(scroll_area)
 
-        main_widget = QtWidgets.QWidget()
+        self.main_widget = QtWidgets.QWidget()
+        self.main_widget.setObjectName('Interpolate')
         main_layout = QtWidgets.QVBoxLayout()
         main_layout.setContentsMargins(5, 5, 5, 5)
         main_layout.setAlignment(QtCore.Qt.AlignTop)
-        main_widget.setLayout(main_layout)
-        scroll_area.setWidget(main_widget)
+        self.main_widget.setLayout(main_layout)
+        scroll_area.setWidget(self.main_widget)
 
         self.interp_layout = QtWidgets.QVBoxLayout()
         self.interp_layout.setContentsMargins(0, 0, 0, 0)
@@ -60,10 +65,17 @@ class Interpolate(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         self.interp_layout.addWidget(new_widget)
         self._interp_widget.append(new_widget)
         new_widget.CLOSE.connect(partial(self.remove, new_widget))
+        new_widget.setFixedHeight(0)
+        new_widget._animate_expand(True)
 
     def remove(self, interp_widget, *args):  # *args takes unnecessary param
+        interp_widget.DELETE.connect(partial(self._delete, interp_widget))
         self._interp_widget.remove(interp_widget)
+        interp_widget._animate_expand(False)
+
+    def _delete(self, interp_widget, *args):
         self.interp_layout.removeWidget(interp_widget)
+        interp_widget._animation = None
         interp_widget.deleteLater()
 
     def connect_dock_widget(self, dock_name, dock_widget):  # Might be irrelevant
@@ -81,7 +93,9 @@ class Interpolate(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 class InterpolateWidget(QtWidgets.QFrame):
     # signal variables
     CLOSE = QtCore.Signal(str)
-    signal_str = 'CLOSE'
+    DELETE = QtCore.Signal(str)
+    signal_close = 'CLOSE'
+    signal_delete = 'DELETE'
 
     def __init__(self):
         QtWidgets.QFrame.__init__(self)
@@ -90,25 +104,47 @@ class InterpolateWidget(QtWidgets.QFrame):
         # self.setFixedWidth(320)
 
         self.setLayout(QtWidgets.QVBoxLayout())
-        self.layout().setContentsMargins(5, 5, 5, 5)
-        self.layout().setSpacing(5)
-        # self.layout().setAlignment(QtCore.Qt.AlignTop)
+        self.layout().setContentsMargins(3, 1, 3, 3)
+        self.layout().setSpacing(0)
+        self.setFixedHeight(150)
+
+        main_widget = QtWidgets.QWidget()
+        main_widget.setLayout(QtWidgets.QVBoxLayout())
+        main_widget.layout().setContentsMargins(2, 2, 2, 2)
+        main_widget.layout().setSpacing(5)
+        main_widget.setFixedHeight(140)
+        main_widget.setFixedWidth(290)
+
+        graphics_scene = QtWidgets.QGraphicsScene()
+        graphics_view = QtWidgets.QGraphicsView()
+        graphics_view.setScene(graphics_scene)
+        graphics_view.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        graphics_view.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        graphics_view.setFocusPolicy(QtCore.Qt.NoFocus)
+        graphics_view.setStyleSheet('QGraphicsView {border-style: none;}')
+        graphics_view.setSizePolicy(QtWidgets.QSizePolicy.Minimum,
+                                    QtWidgets.QSizePolicy.Minimum)
+        self.layout().addWidget(graphics_view)
+        self.main_widget_proxy = graphics_scene.addWidget(main_widget)
+        main_widget.setParent(graphics_view)
 
         title_layout = QtWidgets.QHBoxLayout()
         select_layout = QtWidgets.QHBoxLayout()
         button_layout = QtWidgets.QHBoxLayout()
         slider_layout = QtWidgets.QHBoxLayout()
         check_layout = QtWidgets.QHBoxLayout()
-        self.layout().addLayout(title_layout)
-        self.layout().addLayout(select_layout)
-        self.layout().addLayout(button_layout)
-        self.layout().addLayout(slider_layout)
-        self.layout().addLayout(check_layout)
+        main_widget.layout().addLayout(title_layout)
+        main_widget.layout().addLayout(select_layout)
+        main_widget.layout().addLayout(button_layout)
+        main_widget.layout().addLayout(slider_layout)
+        main_widget.layout().addLayout(check_layout)
 
         title_line_edit = QtWidgets.QLineEdit('Untitled')
+        title_line_edit.setFixedHeight(20)
         title_layout.addWidget(title_line_edit)
 
         self.close_button = QtWidgets.QPushButton('X')
+        self.close_button.setObjectName('roundedButton')
         self.close_button.setFixedHeight(20)
         self.close_button.setFixedWidth(20)
         title_layout.addWidget(self.close_button)
@@ -150,6 +186,7 @@ class InterpolateWidget(QtWidgets.QFrame):
 
         self.items = {}
         self.slider_down = False
+        self._animation = None
 
         self.close_button.clicked.connect(self.close_widget)
 
@@ -164,6 +201,61 @@ class InterpolateWidget(QtWidgets.QFrame):
         self.slider.sliderReleased.connect(self._end_slider_undo)
 
         self.enable_buttons(False)
+
+    def _animate_expand(self, value):
+        # opacity_anim = QtCore.QPropertyAnimation(self.main_widget_proxy,
+        #                                          'opacity')
+        # opacity_anim.setStartValue(not(value))
+        # opacity_anim.setEndValue(value)
+        # opacity_anim.setDuration(200)
+        # opacity_anim_curve = QtCore.QEasingCurve()
+        """if value:
+            opacity_anim_curve.setType(QtCore.QEasingCurve.InQuad)
+        else:
+            opacity_anim_curve.setType(QtCore.QEasingCurve.OutQuad)
+        opacity_anim.setEasingCurve(opacity_anim_curve)
+        """
+        size_anim = QtCore.QPropertyAnimation(self, 'geometry')
+
+        geometry = self.geometry()
+        width = geometry.width()
+        x, y, _, _ = geometry.getCoords()  # _ variables accept info then dump
+
+        size_start = QtCore.QRect(x, y, width, int(not(value) * 150))
+        size_end = QtCore.QRect(x, y, width, int(value) * 150)
+
+        size_anim.setStartValue(size_start)
+        size_anim.setEndValue(size_end)
+        size_anim.setDuration(300)
+
+        size_anim_curve = QtCore.QEasingCurve()
+        if value:
+            size_anim_curve.setType(QtCore.QEasingCurve.InQuad)
+        else:
+            size_anim_curve.setType(QtCore.QEasingCurve.OutQuad)
+        size_anim.setEasingCurve(size_anim_curve)
+
+        self._animation = size_anim
+        """
+        if value:
+            self.main_widget_proxy.setOpacity(0)
+            self._animation.addAnimation(size_anim)
+            self._animation.addAnimation(opacity_anim)
+        else:
+            self.main_widget_proxy.setOpacity(1)
+            self._animation.addAnimation(opacity_anim)
+            self._animation.addAnimation(size_anim)
+        
+        # self._animation.finished.connect(self._animation.clear)
+        """
+        size_anim.valueChanged.connect(self._force_resize)
+
+        if not value:
+            size_anim.finished.connect(self.delete_widget)
+        size_anim.start(QtCore.QAbstractAnimation.DeleteWhenStopped)
+
+    def _force_resize(self, new_height):
+        self.setFixedHeight(new_height.height())
 
     def _start_slider_undo(self):
         pm.undoInfo(openChunk=True)
@@ -311,7 +403,10 @@ class InterpolateWidget(QtWidgets.QFrame):
                 pm.setAttr(node.attr(attr), cache[attr][value])
 
     def close_widget(self):
-        self.CLOSE.emit(self.signal_str)
+        self.CLOSE.emit(self.signal_close)
+
+    def delete_widget(self):
+        self.DELETE.emit(self.signal_delete)
 
 
 dialog = None
