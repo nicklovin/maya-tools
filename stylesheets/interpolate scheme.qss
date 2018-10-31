@@ -4,9 +4,9 @@ QWidget
     color : rgb(202, 207, 210);
 }
 
-QWidget#Interpolate
+QScrollArea
 {
-    background-color : rgb(255, 13, 15);
+    background-color : rgb(12, 13, 15);
 }
 
 QWidget:disabled
@@ -57,3 +57,28 @@ QPushButton#roundedButton
     border-radius: 10px;
 }
 
+QSlider
+{
+    height: 24;
+}
+
+QSlider::groove:horizontal
+{
+    border: 1px, solid rgb(9, 10, 12);
+    border-radius : 11px;
+    background: rgb(9, 10, 12);
+}
+
+QSlider::handle:horizontal
+{
+    border: 2px solid rgb(9, 10, 12);
+    border-radius: 11px;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 rgb(53, 57, 60), stop:1 rgb(33, 34, 36));
+    width: 18;
+}
+
+QSlider::handle:horizontal:hover,
+QSlider::handle:horizontal:pressed
+{
+    border: 2px solid rgb(0, 255, 0);
+}

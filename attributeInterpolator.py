@@ -5,6 +5,9 @@ from functools import partial
 # Dockable options
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
+import widgets.button as button
+reload(button)
+
 
 class Interpolate(MayaQWidgetDockableMixin, QtWidgets.QDialog):
     def __init__(self, parent=None):
@@ -46,7 +49,7 @@ class Interpolate(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         button_layout.setAlignment(QtCore.Qt.AlignRight)
         main_layout.addLayout(button_layout)
 
-        add_button = QtWidgets.QPushButton('New..')
+        add_button = button.DT_ButtonThin('New..')
         button_layout.addWidget(add_button)
 
         new_widget = InterpolateWidget()
@@ -149,8 +152,9 @@ class InterpolateWidget(QtWidgets.QFrame):
         self.close_button.setFixedWidth(20)
         title_layout.addWidget(self.close_button)
 
-        store_items = QtWidgets.QPushButton('Store Items')
-        clear_items = QtWidgets.QPushButton('Clear Items')
+        # store_items = QtWidgets.QPushButton('Store Items')
+        store_items = button.DT_Button('Store Items')
+        clear_items = button.DT_Button('Clear Items')
 
         select_layout.addSpacerItem(QtWidgets.QSpacerItem
                                     (5, 5, QtWidgets.QSizePolicy.Expanding))
@@ -159,9 +163,9 @@ class InterpolateWidget(QtWidgets.QFrame):
         select_layout.addSpacerItem(QtWidgets.QSpacerItem
                                     (5, 5, QtWidgets.QSizePolicy.Expanding))
 
-        self.store_start_button = QtWidgets.QPushButton('Store Start')
-        self.reset_item_button = QtWidgets.QPushButton('Reset')
-        self.store_end_button = QtWidgets.QPushButton('Store End')
+        self.store_start_button = button.DT_ButtonThin('Store Start')
+        self.reset_item_button = button.DT_ButtonThin('Reset')
+        self.store_end_button = button.DT_ButtonThin('Store End')
 
         button_layout.addWidget(self.store_start_button)
         button_layout.addWidget(self.reset_item_button)
