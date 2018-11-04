@@ -1,10 +1,13 @@
 from PySide2 import QtWidgets, QtCore, QtGui
+import base
+
+reload(base)
 
 NORMAL, DOWN, DISABLED = 1, 2, 3
 INNER, OUTER = 1, 2
 
 
-class DT_Button(QtWidgets.QPushButton):
+class DT_Button(QtWidgets.QPushButton, base.Base):
     _pens_text = QtGui.QPen(QtGui.QColor(202, 207, 210), 1, QtCore.Qt.SolidLine)
     _pens_shadow = QtGui.QPen(QtGui.QColor(9, 10, 12), 1, QtCore.Qt.SolidLine)
     _pens_border = QtGui.QPen(QtGui.QColor(9, 10, 12), 1, QtCore.Qt.SolidLine)
@@ -55,14 +58,11 @@ class DT_Button(QtWidgets.QPushButton):
 
     def __init__(self, *args, **kwargs):
         QtWidgets.QPushButton.__init__(self, *args, **kwargs)
+        base.Base.__init__(self)
         self.setFixedHeight(27)
+        self.setMouseTracking(True)
 
-        font = QtGui.QFont()
-        font.setPointSize(8)
-        font.setFamily('Calibri')
-        self.setFont(font)
-
-        self.font_metrics = QtGui.QFontMetrics(font)
+        self.font_metrics = QtGui.QFontMetrics(self.font())
         self.radius = 5
 
     def paintEvent(self, event):  # Name ignores PEP8 to override previous function
@@ -137,3 +137,54 @@ class DT_ButtonThin(DT_Button):
         DT_Button.__init__(self, *args, **kwargs)
         self.setFixedHeight(22)
         self.radius = 10
+
+
+class DT_CloseButton(DT_Button):
+    def __init__(self, *args, **kwargs):
+        DT_Button.__init__(self, *args, **kwargs)
+        self.setFixedHeight(20)
+        self.setFixedWidth(20)
+        self.radius = 10
+
+    def paintEvent(self, event):  # Name ignores PEP8 to override previous function
+        painter = QtWidgets.QStylePainter(self)
+        option = QtWidgets.QStyleOption()
+        option.initFrom(self)
+
+        x = option.rect.x()
+        y = option.rect.y()
+        height = option.rect.height() - 1
+        width = option.rect.width() - 1
+
+        painter.setRenderHint(QtGui.QPainter.Antialiasing)
+
+        radius = self.radius
+
+        gradient = self._gradient[NORMAL]
+        offset = 0
+        if self.isDown():
+            gradient = self._gradient[DOWN]
+            offset = 1
+        elif not self.isEnabled():
+            gradient = self._gradient[DISABLED]
+
+        painter.setPen(self._pens_border)
+        painter.drawEllipse(x + 1, y + 1, width - 1, height - 1)
+
+        painter.setPen(self._pens_clear)
+        painter.setBrush(gradient[OUTER])
+        painter.drawEllipse(x+2, y+2, width-3, height-2)
+
+        painter.setBrush(gradient[INNER])
+        painter.drawEllipse(x + 3, y + 3, width - 5, height - 4)
+
+        painter.setBrush(self._brush_clear)
+
+        line_path = QtGui.QPainterPath()
+        line_path.moveTo(x+8, y+8)
+        line_path.lineTo(x+12, y+12)
+        line_path.moveTo(x+12, y + 8)
+        line_path.lineTo(x+8, y+12)
+
+        painter.setPen(self._pens_border)
+        painter.drawPath(line_path)

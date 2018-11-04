@@ -63,6 +63,8 @@ class Interpolate(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
         add_button.clicked.connect(self.add)
 
+
+
     def add(self):
         new_widget = InterpolateWidget()
         self.interp_layout.addWidget(new_widget)
@@ -146,7 +148,7 @@ class InterpolateWidget(QtWidgets.QFrame):
         title_line_edit.setFixedHeight(20)
         title_layout.addWidget(title_line_edit)
 
-        self.close_button = QtWidgets.QPushButton('X')
+        self.close_button = button.DT_CloseButton('X')
         self.close_button.setObjectName('roundedButton')
         self.close_button.setFixedHeight(20)
         self.close_button.setFixedWidth(20)
