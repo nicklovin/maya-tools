@@ -1496,8 +1496,8 @@ def lock_hide_attr(*arg):
 
 
 def unlock_show_attr(*arg):
-    show_attr()
     unlock_attr()
+    show_attr()
 
 
 def change_attr_box(*arg):
