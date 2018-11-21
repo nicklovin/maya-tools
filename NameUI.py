@@ -4,9 +4,9 @@ from PySide2 import QtWidgets, QtGui, QtCore
 dialog = None
 
 
-class NameUI(QtWidgets.QDialog):
+class NameUI(QtWidgets.QFrame):
     def __init__(self):
-        QtWidgets.QDialog.__init__(self)
+        QtWidgets.QFrame.__init__(self)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowTitle('Name Tool')
         self.setFixedHeight(285)
@@ -105,6 +105,7 @@ class NameUI(QtWidgets.QDialog):
         self.rename_start_number.setFixedWidth(50)
         self.rename_start_number.setMinimum(0)
         self.rename_start_number.setMaximum(999)
+        self.rename_start_number.setValue(20)
 
         rename_starting_number_layout.addWidget(self.rename_start_label)
         rename_starting_number_layout.addWidget(self.rename_start_number)
@@ -220,6 +221,7 @@ class NameUI(QtWidgets.QDialog):
         visible = self.rename_alpha_radio.isChecked()
         self.lower_radio.setVisible(visible)
         self.upper_radio.setVisible(visible)
+        self.rename_start_number.set
 
     def _get_rename_settings(self):
         text = str(self.rename_line_edit.text()).strip()

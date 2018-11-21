@@ -1,18 +1,36 @@
 from PySide2 import QtWidgets, QtCore, QtGui
+import pymel.core as pm
 import maya.cmds as cmds
+from functools import partial
+# Dockable options
+from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
+import NameUI
+from master_rigger import attributeManipulation as attr
+from master_rigger import createNodeLibrary as node
+reload(attr)
+reload(node)
 
 
-class RiggingDock(QtWidgets.QDialog):
+class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
     window_name = 'Rigging Dock'
 
-    def __init__(self):
-        super(RiggingDock, self).__init__()
+    def __init__(self, parent=None, ss_path=''):  # set default ss if made
+        super(RiggingDock, self).__init__(parent=parent)
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        self.setWindowTitle(self.window_name)
 
-        self.build_ui()
+        # Temp forced resizers, remove later and set default sizes
+        # self.setFixedHeight(400)
+        # self.setFixedWidth(600)
 
-    def build_ui(self):
+        # Optional Stylesheet for later work
+        try:
+            style_sheet_file = open(ss_path)
+            self.setStyleSheet(style_sheet_file.read())
+        except IOError:
+            pass
+
         self.setLayout(QtWidgets.QVBoxLayout())
-
         self.layout().setContentsMargins(5, 5, 5, 5)
         self.layout().setSpacing(5)
 
@@ -20,6 +38,7 @@ class RiggingDock(QtWidgets.QDialog):
         text_layout.setSpacing(5)
         self.layout().addLayout(text_layout)
 
+        # Temporary placeholders to keep the dock active
         example_label = QtWidgets.QLabel('Title:')
         bold_font = QtGui.QFont()
         bold_font.setBold(True)
@@ -31,8 +50,74 @@ class RiggingDock(QtWidgets.QDialog):
         text_layout.addWidget(example_label)
         text_layout.addWidget(example_line_edit)
 
+        tab_layout = QtWidgets.QHBoxLayout()
+        self.layout().addLayout(tab_layout)
 
-def show_ui():
-    ui = RiggingDock()
-    ui.show()
-    return ui
+        tab_widget = QtWidgets.QTabWidget()
+        tab_layout.addWidget(tab_widget)
+
+        # Rigging categories
+        general_tools_layout = QtWidgets.QVBoxLayout()
+        skeleton_tools_layout = QtWidgets.QVBoxLayout()
+        deformer_tools_layout = QtWidgets.QVBoxLayout()
+        skinning_tools_layout = QtWidgets.QVBoxLayout()
+        control_tools_layout = QtWidgets.QVBoxLayout()
+        custom_tools_layout = QtWidgets.QVBoxLayout()
+
+        # General tools tab ----------------------------------------------------
+        general_tab = QtWidgets.QWidget()
+        tab_widget.addTab(general_tab, 'General')
+        general_tab.setLayout(general_tools_layout)
+
+        # Naming functions
+        name_ui = NameUI.NameUI()
+        general_tools_layout.addWidget(name_ui)
+
+        # Attribute functions
+        general_tab.layout().addWidget(NameUI.Splitter('Attribute'))
+        attr_ui = attr.AttributeWidget()
+        general_tools_layout.addWidget(attr_ui)
+
+        # Node functions
+        general_tab.layout().addWidget(NameUI.Splitter('Nodes'))
+        node_ui = node.NodeWidget()
+        general_tools_layout.addWidget(node_ui)
+
+        # Skeleton tools tab ---------------------------------------------------
+        skeleton_tab = QtWidgets.QWidget()
+        tab_widget.addTab(skeleton_tab, 'Skeleton')
+        skeleton_tab.setLayout(skeleton_tools_layout)
+
+        # Deformer tools tab ---------------------------------------------------
+        deformer_tab = QtWidgets.QWidget()
+        tab_widget.addTab(deformer_tab, 'Deformers')
+        deformer_tab.setLayout(deformer_tools_layout)
+
+        # Skinning tools tab ---------------------------------------------------
+        skinning_tab = QtWidgets.QWidget()
+        tab_widget.addTab(skinning_tab, 'Skinning')
+        skinning_tab.setLayout(skinning_tools_layout)
+
+        # Control tools tab ----------------------------------------------------
+        controls_tab = QtWidgets.QWidget()
+        tab_widget.addTab(controls_tab, 'Controls')
+        controls_tab.setLayout(control_tools_layout)
+
+        # Custom tools tab -----------------------------------------------------
+        custom_tab = QtWidgets.QWidget()
+        tab_widget.addTab(custom_tab, 'Custom')
+        custom_tab.setLayout(custom_tools_layout)
+
+
+
+dialog = None
+
+
+def show_ui(docked=True):
+    global dialog
+    if dialog is None:
+        dialog = RiggingDock()
+    if docked:
+        dialog.show(dockable=True, floating=False, area='right')
+    else:
+        dialog.show()
