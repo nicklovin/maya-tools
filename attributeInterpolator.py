@@ -17,8 +17,11 @@ class Interpolate(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         self.setFixedWidth(314)
 
         # Make adjustments to find the file location
-        style_sheet_file = open('C:\Users\Nick Love\PycharmProjects\maya_tools\stylesheets\interpolate scheme.qss', 'r')
-        self.setStyleSheet(style_sheet_file.read())
+        try:
+            style_sheet_file = open('C:\Users\Nick Love\PycharmProjects\maya_tools\stylesheets\interpolate scheme.qss', 'r')
+            self.setStyleSheet(style_sheet_file.read())
+        except IOError:
+            pass
 
         self.setLayout(QtWidgets.QVBoxLayout())
         self.layout().setContentsMargins(0, 0, 0, 0)

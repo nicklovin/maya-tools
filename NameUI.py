@@ -105,7 +105,6 @@ class NameUI(QtWidgets.QFrame):
         self.rename_start_number.setFixedWidth(50)
         self.rename_start_number.setMinimum(0)
         self.rename_start_number.setMaximum(999)
-        self.rename_start_number.setValue(20)
 
         rename_starting_number_layout.addWidget(self.rename_start_label)
         rename_starting_number_layout.addWidget(self.rename_start_number)
@@ -221,7 +220,8 @@ class NameUI(QtWidgets.QFrame):
         visible = self.rename_alpha_radio.isChecked()
         self.lower_radio.setVisible(visible)
         self.upper_radio.setVisible(visible)
-        self.rename_start_number.set
+        self.rename_start_number.setValue(int(visible))
+        self.rename_start_number.setMinimum(int(visible))
 
     def _get_rename_settings(self):
         text = str(self.rename_line_edit.text()).strip()

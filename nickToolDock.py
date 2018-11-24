@@ -7,8 +7,13 @@ from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 import NameUI
 from master_rigger import attributeManipulation as attr
 from master_rigger import createNodeLibrary as node
+from master_rigger import basicTools as tool
+from master_rigger import curve_assignment as crv
+reload(NameUI)
 reload(attr)
 reload(node)
+reload(tool)
+reload(crv)
 
 
 class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
@@ -54,6 +59,7 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         self.layout().addLayout(tab_layout)
 
         tab_widget = QtWidgets.QTabWidget()
+        tab_widget.setTabPosition(tab_widget.West)
         tab_layout.addWidget(tab_widget)
 
         # Rigging categories
@@ -72,16 +78,24 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         # Naming functions
         name_ui = NameUI.NameUI()
         general_tools_layout.addWidget(name_ui)
+        general_tab.layout().addLayout(NameUI.SplitterLayout())
 
         # Attribute functions
-        general_tab.layout().addWidget(NameUI.Splitter('Attribute'))
+        general_tab.layout().addWidget(NameUI.Splitter('Edit Attribute'))
         attr_ui = attr.AttributeWidget()
         general_tools_layout.addWidget(attr_ui)
+        general_tab.layout().addLayout(NameUI.SplitterLayout())
+
+        general_tab.layout().addWidget(NameUI.Splitter('Create Attribute'))
+        add_attr_ui = attr.AddAttributesWidget()
+        general_tools_layout.addWidget(add_attr_ui)
+        general_tab.layout().addLayout(NameUI.SplitterLayout())
 
         # Node functions
         general_tab.layout().addWidget(NameUI.Splitter('Nodes'))
         node_ui = node.NodeWidget()
         general_tools_layout.addWidget(node_ui)
+        general_tab.layout().addLayout(NameUI.SplitterLayout())
 
         # Skeleton tools tab ---------------------------------------------------
         skeleton_tab = QtWidgets.QWidget()
@@ -102,6 +116,31 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         controls_tab = QtWidgets.QWidget()
         tab_widget.addTab(controls_tab, 'Controls')
         controls_tab.setLayout(control_tools_layout)
+
+        # Create Controls functions
+        controls_tab.layout().addWidget(NameUI.Splitter('Create Controls'))
+        curve_ui = crv.ControlCurveWidget()
+        control_tools_layout.addWidget(curve_ui)
+        controls_tab.layout().addLayout(NameUI.SplitterLayout())
+
+
+        # Offset functions
+        controls_tab.layout().addWidget(NameUI.Splitter('Offsets'))
+        offset_ui = tool.OffsetNodeWidget()
+        control_tools_layout.addWidget(offset_ui)
+        controls_tab.layout().addLayout(NameUI.SplitterLayout())
+
+        # Match transformations
+        controls_tab.layout().addWidget(NameUI.Splitter('Transformations'))
+        transforms_ui = tool.TransformWidget()
+        control_tools_layout.addWidget(transforms_ui)
+        controls_tab.layout().addLayout(NameUI.SplitterLayout())
+
+        # Dead Space Killer
+        controls_tab.layout().addSpacerItem(
+            QtWidgets.QSpacerItem(5, 5, QtWidgets.QSizePolicy.Minimum,
+                                  QtWidgets.QSizePolicy.Expanding)
+        )
 
         # Custom tools tab -----------------------------------------------------
         custom_tab = QtWidgets.QWidget()
