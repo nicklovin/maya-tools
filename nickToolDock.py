@@ -4,16 +4,17 @@ import maya.cmds as cmds
 from functools import partial
 # Dockable options
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
-import NameUI
+from master_rigger import Splitter
 from master_rigger import attributeManipulation as attr
 from master_rigger import createNodeLibrary as node
 from master_rigger import basicTools as tool
 from master_rigger import curve_assignment as crv
-reload(NameUI)
+from master_rigger import renamerLibrary as name
 reload(attr)
 reload(node)
 reload(tool)
 reload(crv)
+reload(name)
 
 
 class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
@@ -76,26 +77,26 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         general_tab.setLayout(general_tools_layout)
 
         # Naming functions
-        name_ui = NameUI.NameUI()
+        name_ui = name.NamingWidget()
         general_tools_layout.addWidget(name_ui)
-        general_tab.layout().addLayout(NameUI.SplitterLayout())
+        general_tab.layout().addLayout(Splitter.SplitterLayout())
 
         # Attribute functions
-        general_tab.layout().addWidget(NameUI.Splitter('Edit Attribute'))
+        general_tab.layout().addWidget(Splitter.Splitter('Edit Attribute'))
         attr_ui = attr.AttributeWidget()
         general_tools_layout.addWidget(attr_ui)
-        general_tab.layout().addLayout(NameUI.SplitterLayout())
+        general_tab.layout().addLayout(Splitter.SplitterLayout())
 
-        general_tab.layout().addWidget(NameUI.Splitter('Create Attribute'))
+        general_tab.layout().addWidget(Splitter.Splitter('Create Attribute'))
         add_attr_ui = attr.AddAttributesWidget()
         general_tools_layout.addWidget(add_attr_ui)
-        general_tab.layout().addLayout(NameUI.SplitterLayout())
+        general_tab.layout().addLayout(Splitter.SplitterLayout())
 
         # Node functions
-        general_tab.layout().addWidget(NameUI.Splitter('Nodes'))
+        general_tab.layout().addWidget(Splitter.Splitter('Nodes'))
         node_ui = node.NodeWidget()
         general_tools_layout.addWidget(node_ui)
-        general_tab.layout().addLayout(NameUI.SplitterLayout())
+        general_tab.layout().addLayout(Splitter.SplitterLayout())
 
         # Skeleton tools tab ---------------------------------------------------
         skeleton_tab = QtWidgets.QWidget()
@@ -118,23 +119,23 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         controls_tab.setLayout(control_tools_layout)
 
         # Create Controls functions
-        controls_tab.layout().addWidget(NameUI.Splitter('Create Controls'))
+        controls_tab.layout().addWidget(Splitter.Splitter('Create Controls'))
         curve_ui = crv.ControlCurveWidget()
         control_tools_layout.addWidget(curve_ui)
-        controls_tab.layout().addLayout(NameUI.SplitterLayout())
+        controls_tab.layout().addLayout(Splitter.SplitterLayout())
 
 
         # Offset functions
-        controls_tab.layout().addWidget(NameUI.Splitter('Offsets'))
+        controls_tab.layout().addWidget(Splitter.Splitter('Offsets'))
         offset_ui = tool.OffsetNodeWidget()
         control_tools_layout.addWidget(offset_ui)
-        controls_tab.layout().addLayout(NameUI.SplitterLayout())
+        controls_tab.layout().addLayout(Splitter.SplitterLayout())
 
         # Match transformations
-        controls_tab.layout().addWidget(NameUI.Splitter('Transformations'))
+        controls_tab.layout().addWidget(Splitter.Splitter('Transformations'))
         transforms_ui = tool.TransformWidget()
         control_tools_layout.addWidget(transforms_ui)
-        controls_tab.layout().addLayout(NameUI.SplitterLayout())
+        controls_tab.layout().addLayout(Splitter.SplitterLayout())
 
         # Dead Space Killer
         controls_tab.layout().addSpacerItem(
@@ -146,7 +147,6 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         custom_tab = QtWidgets.QWidget()
         tab_widget.addTab(custom_tab, 'Custom')
         custom_tab.setLayout(custom_tools_layout)
-
 
 
 dialog = None
