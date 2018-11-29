@@ -10,11 +10,13 @@ from master_rigger import createNodeLibrary as node
 from master_rigger import basicTools as tool
 from master_rigger import curve_assignment as crv
 from master_rigger import renamerLibrary as name
+from dockTools import skeletonWidgets as skele
 reload(attr)
 reload(node)
 reload(tool)
 reload(crv)
 reload(name)
+reload(skele)
 
 
 class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
@@ -102,6 +104,17 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         skeleton_tab = QtWidgets.QWidget()
         tab_widget.addTab(skeleton_tab, 'Skeleton')
         skeleton_tab.setLayout(skeleton_tools_layout)
+
+        skeleton_tab.layout().addWidget(Splitter.Splitter('Skeleton Tools'))
+        skeleton_ui = skele.CommonSkeletonToolWidget()
+        skeleton_tools_layout.addWidget(skeleton_ui)
+        skeleton_tab.layout().addLayout(Splitter.SplitterLayout())
+
+        # Dead Space Killer
+        skeleton_tab.layout().addSpacerItem(
+            QtWidgets.QSpacerItem(5, 5, QtWidgets.QSizePolicy.Minimum,
+                                  QtWidgets.QSizePolicy.Expanding)
+        )
 
         # Deformer tools tab ---------------------------------------------------
         deformer_tab = QtWidgets.QWidget()
