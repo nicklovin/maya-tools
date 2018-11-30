@@ -106,7 +106,7 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         skeleton_tab.setLayout(skeleton_tools_layout)
 
         skeleton_tab.layout().addWidget(Splitter.Splitter('Skeleton Tools'))
-        skeleton_ui = skele.CommonSkeletonToolWidget()
+        skeleton_ui = skele.SkeletonToolsWidget()
         skeleton_tools_layout.addWidget(skeleton_ui)
         skeleton_tab.layout().addLayout(Splitter.SplitterLayout())
 
