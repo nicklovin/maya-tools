@@ -99,6 +99,12 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         node_ui = node.NodeWidget()
         general_tools_layout.addWidget(node_ui)
         general_tab.layout().addLayout(Splitter.SplitterLayout())
+        
+        # Dead Space Killer
+        general_tab.layout().addSpacerItem(
+            QtWidgets.QSpacerItem(5, 5, QtWidgets.QSizePolicy.Minimum,
+                                  QtWidgets.QSizePolicy.Expanding)
+        )
 
         # Skeleton tools tab ---------------------------------------------------
         skeleton_tab = QtWidgets.QWidget()
