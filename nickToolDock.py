@@ -99,7 +99,7 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         node_ui = node.NodeWidget()
         general_tools_layout.addWidget(node_ui)
         general_tab.layout().addLayout(Splitter.SplitterLayout())
-        
+
         # Dead Space Killer
         general_tab.layout().addSpacerItem(
             QtWidgets.QSpacerItem(5, 5, QtWidgets.QSizePolicy.Minimum,
@@ -142,7 +142,6 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         curve_ui = crv.ControlCurveWidget()
         control_tools_layout.addWidget(curve_ui)
         controls_tab.layout().addLayout(Splitter.SplitterLayout())
-
 
         # Offset functions
         controls_tab.layout().addWidget(Splitter.Splitter('Offsets'))
