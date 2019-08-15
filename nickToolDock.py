@@ -10,13 +10,17 @@ from master_rigger import createNodeLibrary as node
 from master_rigger import basicTools as tool
 from master_rigger import curve_assignment as crv
 from master_rigger import renamerLibrary as name
+from master_rigger import riggingTools as rTool
 from dockTools import skeletonWidgets as skele
+from dockTools import globalWidget as glob
 reload(attr)
 reload(node)
 reload(tool)
 reload(crv)
 reload(name)
 reload(skele)
+reload(rTool)
+reload(glob)
 
 
 class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
@@ -58,6 +62,17 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         text_layout.addWidget(example_label)
         text_layout.addWidget(example_line_edit)
 
+        self.layout().addWidget(Splitter.Splitter('Global Tools'))
+
+        global_tools_layout = QtWidgets.QHBoxLayout()
+        global_tools_layout.setSpacing(5)
+        self.layout().addLayout(global_tools_layout)
+
+        global_tools_widget = glob.GlobalToolWidget()
+        global_tools_layout.addWidget(global_tools_widget)
+        self.layout().addLayout(Splitter.SplitterLayout())
+
+        # Tabs Layout ----------------------------------------------------------
         tab_layout = QtWidgets.QHBoxLayout()
         self.layout().addLayout(tab_layout)
 
@@ -71,6 +86,7 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         deformer_tools_layout = QtWidgets.QVBoxLayout()
         skinning_tools_layout = QtWidgets.QVBoxLayout()
         control_tools_layout = QtWidgets.QVBoxLayout()
+        viewport_tools_layout = QtWidgets.QVBoxLayout()
         custom_tools_layout = QtWidgets.QVBoxLayout()
 
         # General tools tab ----------------------------------------------------
@@ -155,8 +171,37 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         control_tools_layout.addWidget(transforms_ui)
         controls_tab.layout().addLayout(Splitter.SplitterLayout())
 
+        # Rivets (Move Later)
+        controls_tab.layout().addWidget(Splitter.Splitter('Rivet (WIP)'))
+        rivet_ui = rTool.RivetWidget()
+        control_tools_layout.addWidget(rivet_ui)
+        controls_tab.layout().addLayout(Splitter.SplitterLayout())
+
+        # PV Solver (Move Later)
+        controls_tab.layout().addWidget(Splitter.Splitter('Pole Vector Solver (WIP)'))
+        pv_ui = rTool.PVWidget()
+        control_tools_layout.addWidget(pv_ui)
+        controls_tab.layout().addLayout(Splitter.SplitterLayout())
+
         # Dead Space Killer
         controls_tab.layout().addSpacerItem(
+            QtWidgets.QSpacerItem(5, 5, QtWidgets.QSizePolicy.Minimum,
+                                  QtWidgets.QSizePolicy.Expanding)
+        )
+
+        # Viewport tools tab ---------------------------------------------------
+        viewport_tab = QtWidgets.QWidget()
+        tab_widget.addTab(viewport_tab, 'Viewport')
+        viewport_tab.setLayout(viewport_tools_layout)
+
+        # Isolate Selection functions (move later?)
+        viewport_tab.layout().addWidget(Splitter.Splitter('Isolate Options'))
+        isolate_ui = tool.IsolateSelectionWidget()
+        viewport_tools_layout.addWidget(isolate_ui)
+        viewport_tab.layout().addLayout(Splitter.SplitterLayout())
+
+        # Dead Space Killer
+        viewport_tools_layout.layout().addSpacerItem(
             QtWidgets.QSpacerItem(5, 5, QtWidgets.QSizePolicy.Minimum,
                                   QtWidgets.QSizePolicy.Expanding)
         )
@@ -165,7 +210,6 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         custom_tab = QtWidgets.QWidget()
         tab_widget.addTab(custom_tab, 'Custom')
         custom_tab.setLayout(custom_tools_layout)
-
 
 dialog = None
 
