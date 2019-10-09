@@ -171,6 +171,18 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         control_tools_layout.addWidget(transforms_ui)
         controls_tab.layout().addLayout(Splitter.SplitterLayout())
 
+        # Constraints
+        controls_tab.layout().addWidget(Splitter.Splitter('Constraints'))
+        constraints_ui = rTool.ConstraintWidget()
+        control_tools_layout.addWidget(constraints_ui)
+        controls_tab.layout().addLayout(Splitter.SplitterLayout())
+
+        # Vector Aim Constraint
+        controls_tab.layout().addWidget(Splitter.Splitter('Vector Aim Constraint (WIP)'))
+        aim_ui = rTool.VectorWidget()
+        control_tools_layout.addWidget(aim_ui)
+        controls_tab.layout().addLayout(Splitter.SplitterLayout())
+
         # Rivets (Move Later)
         controls_tab.layout().addWidget(Splitter.Splitter('Rivet (WIP)'))
         rivet_ui = rTool.RivetWidget()
