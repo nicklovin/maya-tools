@@ -1,13 +1,24 @@
 from PySide2 import QtWidgets, QtCore, QtGui
 import pymel.core as pm
-import maya.cmds as cmds
+from maya import cmds
 from functools import partial
+# check these on home setup as well, might be out of date
+try:
+    # Maya 2017+
+    from shiboken2 import wrapInstance
+except ImportError:
+    # Maya 2016-
+    from shiboken import wrapInstance
+from maya import OpenMayaUI as omui
+
 # Dockable options
-from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
+from maya.app.general.mayaMixin import MayaQWidgetDockableMixin, MayaQDockWidget
+
 from master_rigger import Splitter
 from master_rigger import attributeManipulation as attr
 from master_rigger import createNodeLibrary as node
 from master_rigger import basicTools as tool
+from master_rigger import basicRigSetup as rig
 from master_rigger import curve_assignment as crv
 from master_rigger import renamerLibrary as name
 from master_rigger import riggingTools as rTool
@@ -16,6 +27,7 @@ from dockTools import globalWidget as glob
 reload(attr)
 reload(node)
 reload(tool)
+reload(rig)
 reload(crv)
 reload(name)
 reload(skele)
@@ -30,6 +42,7 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         super(RiggingDock, self).__init__(parent=parent)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowTitle(self.window_name)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         # Temp forced resizers, remove later and set default sizes
         # self.setFixedHeight(400)
@@ -171,6 +184,12 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         control_tools_layout.addWidget(transforms_ui)
         controls_tab.layout().addLayout(Splitter.SplitterLayout())
 
+        # Create Rig
+        controls_tab.layout().addWidget(Splitter.Splitter('Create Rig'))
+        rig_ui = rig.CreateRigWidget()
+        control_tools_layout.addWidget(rig_ui)
+        controls_tab.layout().addLayout(Splitter.SplitterLayout())
+
         # Constraints
         controls_tab.layout().addWidget(Splitter.Splitter('Constraints'))
         constraints_ui = rTool.ConstraintWidget()
@@ -222,6 +241,14 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         custom_tab = QtWidgets.QWidget()
         tab_widget.addTab(custom_tab, 'Custom')
         custom_tab.setLayout(custom_tools_layout)
+
+    # Review widget delete/closing at a later time
+    def dockCloseEventTriggered(self):
+        self.deleteInstances()
+
+    def deleteInstances(self):
+        dialog.deleteLater()
+
 
 dialog = None
 
