@@ -1,26 +1,40 @@
 from PySide2 import QtWidgets, QtCore, QtGui
 import pymel.core as pm
-import maya.cmds as cmds
+from maya import cmds
 from functools import partial
+# check these on home setup as well, might be out of date
+try:
+    # Maya 2017+
+    from shiboken2 import wrapInstance
+except ImportError:
+    # Maya 2016-
+    from shiboken import wrapInstance
+from maya import OpenMayaUI as omui
+
 # Dockable options
-from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
+from maya.app.general.mayaMixin import MayaQWidgetDockableMixin, MayaQDockWidget
+
 from master_rigger import Splitter
 from master_rigger import attributeManipulation as attr
 from master_rigger import createNodeLibrary as node
 from master_rigger import basicTools as tool
+from master_rigger import basicRigSetup as rig
 from master_rigger import curve_assignment as crv
 from master_rigger import renamerLibrary as name
 from master_rigger import riggingTools as rTool
+from master_rigger import hierarchy
 from dockTools import skeletonWidgets as skele
 from dockTools import globalWidget as glob
 reload(attr)
 reload(node)
 reload(tool)
+reload(rig)
 reload(crv)
 reload(name)
 reload(skele)
 reload(rTool)
 reload(glob)
+reload(hierarchy)
 
 
 class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
@@ -30,6 +44,7 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         super(RiggingDock, self).__init__(parent=parent)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowTitle(self.window_name)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         # Temp forced resizers, remove later and set default sizes
         # self.setFixedHeight(400)
@@ -123,30 +138,30 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         )
 
         # Skeleton tools tab ---------------------------------------------------
-        skeleton_tab = QtWidgets.QWidget()
-        tab_widget.addTab(skeleton_tab, 'Skeleton')
-        skeleton_tab.setLayout(skeleton_tools_layout)
+        # skeleton_tab = QtWidgets.QWidget()
+        # tab_widget.addTab(skeleton_tab, 'Skeleton')
+        # skeleton_tab.setLayout(skeleton_tools_layout)
 
-        skeleton_tab.layout().addWidget(Splitter.Splitter('Skeleton Tools'))
-        skeleton_ui = skele.SkeletonToolsWidget()
-        skeleton_tools_layout.addWidget(skeleton_ui)
-        skeleton_tab.layout().addLayout(Splitter.SplitterLayout())
+        # skeleton_tab.layout().addWidget(Splitter.Splitter('Skeleton Tools'))
+        # skeleton_ui = skele.SkeletonToolsWidget()
+        # skeleton_tools_layout.addWidget(skeleton_ui)
+        # skeleton_tab.layout().addLayout(Splitter.SplitterLayout())
 
-        # Dead Space Killer
-        skeleton_tab.layout().addSpacerItem(
-            QtWidgets.QSpacerItem(5, 5, QtWidgets.QSizePolicy.Minimum,
-                                  QtWidgets.QSizePolicy.Expanding)
-        )
+        # # Dead Space Killer
+        # skeleton_tab.layout().addSpacerItem(
+        #     QtWidgets.QSpacerItem(5, 5, QtWidgets.QSizePolicy.Minimum,
+        #                           QtWidgets.QSizePolicy.Expanding)
+        # )
 
         # Deformer tools tab ---------------------------------------------------
-        deformer_tab = QtWidgets.QWidget()
-        tab_widget.addTab(deformer_tab, 'Deformers')
-        deformer_tab.setLayout(deformer_tools_layout)
+        # deformer_tab = QtWidgets.QWidget()
+        # tab_widget.addTab(deformer_tab, 'Deformers')
+        # deformer_tab.setLayout(deformer_tools_layout)
 
         # Skinning tools tab ---------------------------------------------------
-        skinning_tab = QtWidgets.QWidget()
-        tab_widget.addTab(skinning_tab, 'Skinning')
-        skinning_tab.setLayout(skinning_tools_layout)
+        # skinning_tab = QtWidgets.QWidget()
+        # tab_widget.addTab(skinning_tab, 'Skinning')
+        # skinning_tab.setLayout(skinning_tools_layout)
 
         # Control tools tab ----------------------------------------------------
         controls_tab = QtWidgets.QWidget()
@@ -171,17 +186,29 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         control_tools_layout.addWidget(transforms_ui)
         controls_tab.layout().addLayout(Splitter.SplitterLayout())
 
+        # Create Rig
+        controls_tab.layout().addWidget(Splitter.Splitter('Create Rig'))
+        rig_ui = rig.CreateRigWidget()
+        control_tools_layout.addWidget(rig_ui)
+        controls_tab.layout().addLayout(Splitter.SplitterLayout())
+
         # Constraints
         controls_tab.layout().addWidget(Splitter.Splitter('Constraints'))
         constraints_ui = rTool.ConstraintWidget()
         control_tools_layout.addWidget(constraints_ui)
         controls_tab.layout().addLayout(Splitter.SplitterLayout())
 
-        # Vector Aim Constraint
-        controls_tab.layout().addWidget(Splitter.Splitter('Vector Aim Constraint (WIP)'))
-        aim_ui = rTool.VectorWidget()
-        control_tools_layout.addWidget(aim_ui)
+        # Hierarchy
+        controls_tab.layout().addWidget(Splitter.Splitter('Hierarchy Tree'))
+        hierarchy_ui = hierarchy.HierarchyTreeWidget()
+        control_tools_layout.addWidget(hierarchy_ui)
         controls_tab.layout().addLayout(Splitter.SplitterLayout())
+
+        # Vector Aim Constraint
+        # controls_tab.layout().addWidget(Splitter.Splitter('Vector Aim Constraint (WIP)'))
+        # aim_ui = rTool.VectorWidget()
+        # control_tools_layout.addWidget(aim_ui)
+        # controls_tab.layout().addLayout(Splitter.SplitterLayout())
 
         # Rivets (Move Later)
         controls_tab.layout().addWidget(Splitter.Splitter('Rivet (WIP)'))
@@ -222,6 +249,14 @@ class RiggingDock(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         custom_tab = QtWidgets.QWidget()
         tab_widget.addTab(custom_tab, 'Custom')
         custom_tab.setLayout(custom_tools_layout)
+
+    # Review widget delete/closing at a later time
+    def dockCloseEventTriggered(self):
+        self.deleteInstances()
+
+    def deleteInstances(self):
+        dialog.deleteLater()
+
 
 dialog = None
 

@@ -3,6 +3,11 @@ import maya.cmds as cmds
 import pymel.core as pm
 import maya.mel as mel
 
+from master_rigger import Splitter
+from master_rigger import sanityChecker  # rename this later
+from maya_tools.contexts.undoContext import UndoContext
+reload(sanityChecker)
+
 
 class GlobalToolWidget(QtWidgets.QFrame):
 
@@ -22,13 +27,25 @@ class GlobalToolWidget(QtWidgets.QFrame):
         global_widget.layout().setSpacing(5)
         global_widget.setSizePolicy(QtWidgets.QSizePolicy.Minimum,
                                     QtWidgets.QSizePolicy.Fixed)
+
+        publish_widget = QtWidgets.QWidget()
+        publish_widget.setLayout(QtWidgets.QVBoxLayout())
+        publish_widget.layout().setContentsMargins(2, 2, 2, 2)
+        publish_widget.layout().setSpacing(5)
+        publish_widget.setSizePolicy(QtWidgets.QSizePolicy.Minimum,
+                                     QtWidgets.QSizePolicy.Fixed)
+
         self.layout().addWidget(global_widget)
+        self.layout().addWidget(Splitter.Splitter('Rig Mode'))
+        self.layout().addWidget(publish_widget)
 
         # Layouts
         button_layout = QtWidgets.QHBoxLayout()
+        publish_layout = QtWidgets.QHBoxLayout()
 
         # Add layouts to widget
         global_widget.layout().addLayout(button_layout)
+        publish_widget.layout().addLayout(publish_layout)
 
         # Buttons
         self.flip_selection_button = QtWidgets.QPushButton('Flip Selection')
@@ -39,9 +56,18 @@ class GlobalToolWidget(QtWidgets.QFrame):
         button_layout.addWidget(self.add_iso_button)
         button_layout.addWidget(self.remove_iso_button)
 
+        self.publish_mode_button = QtWidgets.QPushButton('Publish Mode')
+        self.edit_mode_button = QtWidgets.QPushButton('Edit Mode')
+
+        publish_layout.addWidget(self.publish_mode_button)
+        publish_layout.addWidget(self.edit_mode_button)
+
         self.flip_selection_button.clicked.connect(self.flip_selection)
         self.add_iso_button.clicked.connect(self.add_to_isolate)
         self.remove_iso_button.clicked.connect(self.remove_from_isolate)
+
+        self.publish_mode_button.clicked.connect(self.publish_mode)
+        self.edit_mode_button.clicked.connect(self.edit_mode)
 
     def flip_selection(self):
         sel = cmds.ls(selection=True, recursive=True)
@@ -78,3 +104,11 @@ class GlobalToolWidget(QtWidgets.QFrame):
 
     def remove_from_isolate(self):
         mel.eval('isolateSelect -removeSelected modelPanel4;')
+
+    def publish_mode(self):
+        with UndoContext():
+            sanityChecker.publishMode()
+
+    def edit_mode(self):
+        with UndoContext():
+            sanityChecker.editMode()
